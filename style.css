@@ -1,0 +1,202 @@
+body {
+    margin         : 2.3em 3em;
+    font-family    : 'Open Sans', sans-serif;
+    font-size      : 11pt;
+    line-height    : 1.5em;
+    letter-spacing : 0.01em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    line-height    : 1.2em;
+    letter-spacing : 0em;
+}
+
+h1 {
+    margin         : 1.5em 0 0 -0.7em;
+    font-size      : 200%;
+    padding-bottom : 12pt;
+    border-bottom  : 1px solid gainsboro;
+}
+
+body > h1:first-child,
+body section:first-child > h1:first-child {
+    margin-top : -0.5em;
+}
+
+h2 {
+    margin         : 1.5em 0 0 -0.6em;
+    font-size      : 150%;
+    padding-bottom : 6pt;
+    border-bottom  : 1px solid gainsboro;
+}
+
+h3 {
+    margin    : 1.5em 0 0 -0.5em;
+    font-size : 133%;
+}
+
+h4 {
+    margin    : 1.5em 0 0 -0.4em;
+    font-size : 110%;
+}
+
+h5 {
+    margin    : 1.5em 0 0 -0.3em;
+    font-size : 105%;
+}
+
+h6 {
+    margin    : 1.5em 0 0 -0.2em;
+    font-size : 95%;
+}
+
+dt {
+    margin-left : 1em;
+}
+
+dd {
+    margin-bottom : 1em;
+}
+
+table {
+    border-collapse : collapse;
+    margin-top: 1em;
+}
+
+table,
+table th,
+table td {
+    border : 1px solid gainsboro;
+}
+
+th, td {
+    padding : 0.35em 0.7em;
+}
+
+tr:nth-child(even) td {
+    background-color : whitesmoke;
+}
+
+pre, code {
+    background-color : whitesmoke;
+    font-family      : monospace;
+}
+
+pre {
+    padding       : 1.0em 1.25em;
+    border-radius : 0.5em;
+    line-height   : 1.2em;
+}
+
+code {
+    border-radius  : 0.25em;
+    padding        : 0.02em 0.25em;
+}
+
+pre > code {
+    border-radius : 0;
+    padding       : 0;
+    white-space   : pre-wrap;
+}
+
+blockquote {
+    color        : dimgray;
+    border-left  : 0.3em solid lightgray;
+    padding-left : 1em;
+    margin-left  : 1em;
+}
+
+section#cover > h1:first-child {
+    font-size : 250%;
+}
+
+section#toc ul {
+    list-style-type : none;
+    padding-left    : 1.5em;
+    font-size       : 10pt;
+    line-height     : 1.5em;
+}
+
+section#toc > ul {
+    padding-left : 0;
+}
+
+section#toc a {
+    text-decoration : none;
+}
+
+section#toc a:hover {
+    text-decoration : underline;
+}
+
+@media only print {
+    h1 {
+        page-break-before : always;
+        margin-top        : -0.5em;
+    }
+
+    body > h1:first-child,
+    body section:first-child > h1:first-child {
+        page-break-before : avoid;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        page-break-after : avoid;
+    }
+
+    a {
+        text-decoration : none;
+    }
+
+    a:hover {
+        text-decoration : underline;
+    }
+
+    /*
+        a[href*='//']:after {
+            content : " [" attr(href) "] ";
+        }
+    */
+
+    section#cover {
+        position : relative;
+    }
+
+    section#cover > h1:first-child {
+        string-set   : title content(text);
+        font-size    : 300%;
+        border-top   : 1px solid gainsboro;
+        padding      : 0.5em 0;
+        font-variant : small-caps;
+        text-align   : center;
+        margin       : 3in 0 0 0 !important;
+    }
+
+    section#cover ul {
+        list-style-type : none;
+        padding-left    : 0;
+        position        : absolute;
+        left            : 50%;
+        transform       : translateX(-50%);
+        margin-top      : 1.5in;
+    }
+
+    section#toc a::after {
+        content: " - Page " target-counter(attr(href url), page);
+    }
+
+    @page {
+        size   : letter;
+        margin : 2.3em 3em;
+        bleed  : 0.25in;
+
+        @bottom-right {
+            content : "Page " counter(page) " of " counter(pages);
+        }
+    }
+
+    div.pagedjs_margin-bottom {
+        padding-top: 1em;
+        font-size : 10pt;
+    }
+}

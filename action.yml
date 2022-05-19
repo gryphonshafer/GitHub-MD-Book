@@ -1,0 +1,14 @@
+name: GitHub MD Book
+description: Build Markdown, HTML, and PDF book files from Markdown source files
+branding:
+    icon: book
+    color: blue
+inputs:
+    settings:
+        description: Build configuration settings YAML file repository location
+        required: false
+runs:
+    using: docker
+    image: Dockerfile
+    args:
+        - ${{ inputs.settings }}
