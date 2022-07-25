@@ -15,7 +15,7 @@ file.
         runs-on: ubuntu-latest
         steps:
           - uses: actions/checkout@v2
-          - uses: gryphonshafer/GitHub-MD-Book@v1
+          - uses: gryphonshafer/GitHub-MD-Book@v2
             with:
               settings: .github/github-md-book.yml
 
