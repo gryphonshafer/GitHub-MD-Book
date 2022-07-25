@@ -3,10 +3,10 @@
 [![test](https://github.com/gryphonshafer/GitHub-MD-Book/workflows/test/badge.svg)](https://github.com/gryphonshafer/GitHub-MD-Book/actions?query=workflow%3Atest)
 [![codecov](https://codecov.io/gh/gryphonshafer/GitHub-MD-Book/graph/badge.svg)](https://codecov.io/gh/gryphonshafer/GitHub-MD-Book)
 
-This is a GitHub Action to build Markdown, HTML, and PDF book files from
-Markdown source files. To use, setup a workflow under the project's
-`.github/workflows` directory. The following is an example for a
-`~/.github/workflows/release.yml` file.
+This is a GitHub Action to build Markdown and HTML book files from Markdown
+source files. To use, setup a workflow under the project's `.github/workflows`
+directory. The following is an example for a `~/.github/workflows/release.yml`
+file.
 
     name: release
     on: [ push, pull_request, workflow_dispatch ]
@@ -136,7 +136,7 @@ HTML output will be saved to "output.html" by default.
 
 One or more output types can be set using this option. If this option is not
 specified, all outputs are set for types. The type options available are:
-MD, HTML, and PDF.
+MD and HTML.
 
 ### insert
 
@@ -152,7 +152,7 @@ header section of the HTML generated output. The default is: "style.css".
 
 This option if set will result in an output file with name suffix ".paged.html"
 to be generated. This file is intended to be viewed in a browser to preview
-what a PDF should look like.
+what a printed paged document should look like.
 
 ### quiet
 

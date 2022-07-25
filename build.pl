@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-build.pl - Build Markdown, HTML, and PDF book files from Markdown source files
+build.pl - Build Markdown and HTML book files from Markdown source files
 
 =head1 SYNOPSIS
 
@@ -12,7 +12,7 @@ build.pl - Build Markdown, HTML, and PDF book files from Markdown source files
 
 =head1 DESCRIPTION
 
-This program will build Markdown, HTML, and PDF book files from Markdown source
+This program will build Markdown and HTML book files from Markdown source
 files. Given a C<WORKSPACE_ROOT> directory (which will default to the current
 working directory if not specified), this program will search for Markdown
 source files and build output files based on C<CONFIGURATION_SETTINGS_YAML_FILE>
@@ -143,7 +143,7 @@ HTML output will be saved to "output.html" by default.
 
 One or more output types can be set using this option. If this option is not
 specified, all outputs are set for types. The type options available are:
-MD, HTML, and PDF.
+MD and HTML.
 
 =head3 insert
 
@@ -159,7 +159,7 @@ header section of the HTML generated output. The default is: "style.css".
 
 This option if set will result in an output file with name suffix ".paged.html"
 to be generated. This file is intended to be viewed in a browser to preview
-what a PDF should look like.
+what a printed paged document should look like.
 
 =head3 quiet
 
@@ -228,7 +228,7 @@ my $builds = [
         $build->{basename}   ||= 'output';
         $build->{build_date} ||= '%Y-%m-%d %H:%M:%S %Z';
 
-        $build->{types} = [ qw( md html pdf ) ] unless ( $build->{types} and @{ $build->{types} } );
+        $build->{types} = [ qw( md html ) ] unless ( $build->{types} and @{ $build->{types} } );
 
         my $vars = {
             %ENV,
@@ -413,56 +413,13 @@ for my $opt (@$builds) {
         $spurt->( $html, '.html' );
     }
 
-    if ( $opt->{paged} or grep { /^pdf$/i } @{ $opt->{types} } ) {
+    if ( $opt->{paged} ) {
         $dom = Mojo::DOM->new($html);
         $dom->at('body')->append_content(
             '<script>document.getElementsByTagName("body")[0].style.margin = "0px"</script>'
         );
-    }
 
-    if ( grep { /^pdf$/i } @{ $opt->{types} } ) {
-        say 'Generate PDF output' unless ( $opt->{quiet} );
-        my $iterations;
-
-        my $pdf      = $opt->{directory}->child( $opt->{basename} . '.pdf'            )->remove;
-        my $html2pdf = $opt->{directory}->child( $opt->{basename} . '._html2pdf.html' );
-
-        $spurt->( $dom->to_string, '._html2pdf.html', '.pdf' );
-
-        while ( ++$iterations <= 3 and not -f $pdf ) {
-            say '  Iteration: ' . $iterations unless ( $opt->{quiet} );
-            try {
-                run(
-                    [
-                        'pagedjs-cli',
-                        $html2pdf->to_string,
-                        '-o',
-                        $pdf->to_string,
-                        '--browserArgs',
-                        '--no-sandbox,--disable-setuid-sandbox',
-                    ],
-                    my \$in,
-                    my \$out,
-                    my \$err,
-                    timeout( $iterations * 30 ),
-                );
-
-                die $err if ( $err and index( $err, 'Saved to' ) == -1 );
-
-                say join( "\n", map { '  ' . substr( $_, 2 ) } split( /\r?\n/, $out . $err ) )
-                    unless ( $opt->{quiet} );
-            }
-            catch ($e) {
-                die $e if ( index( $e, 'IPC::Run: timeout on timer' ) == -1 );
-            }
-        }
-
-        $html2pdf->remove;
-        die "Failed to generate PDF output\n" if ( not -f $pdf );
-    }
-
-    if ( $opt->{paged} ) {
-        say 'Write PDF preview HTML output' unless ( $opt->{quiet} );
+        say 'Write paged preview HTML output' unless ( $opt->{quiet} );
         $dom->at('body')
             ->append_content(q{
                 <script src="https://unpkg.com/pagedjs/dist/paged.polyfill.js"></script>
