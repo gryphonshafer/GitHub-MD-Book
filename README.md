@@ -154,6 +154,14 @@ This option if set will result in an output file with name suffix ".paged.html"
 to be generated. This file is intended to be viewed in a browser to preview
 what a PDF should look like.
 
+### pdf_wait
+
+This option if set will cause a wait/sleep period to happen of a given number
+of seconds during the PDF generation phase (if that phase happens). For books
+with a certain level of high complexity or length, setting this wait/sleep time
+gives the underlying rendering process time to perform all necessary work prior
+to rendering the PDF output.
+
 ### quiet
 
 This option if set will silence progress reports.
