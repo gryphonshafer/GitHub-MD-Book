@@ -45,6 +45,7 @@ For example:
         encoding: utf-8
         directory: output
         basename: build
+        pdf_wait: 5
     builds:
       - workspace: book
         basename: book
@@ -161,6 +162,14 @@ This option if set will result in an output file with name suffix ".paged.html"
 to be generated. This file is intended to be viewed in a browser to preview
 what a PDF should look like.
 
+=head2 pdf_wait
+
+This option if set will cause a wait/sleep period to happen of a given number
+of seconds during the PDF generation phase (if that phase happens). For books
+with a certain level of high complexity or length, setting this wait/sleep time
+gives the underlying rendering process time to perform all necessary work prior
+to rendering the PDF output.
+
 =head3 quiet
 
 This option if set will silence progress reports.
@@ -181,11 +190,12 @@ use exact -cli, -me;
 use Cwd 'cwd';
 use Date::Format 'time2str';
 use Encode 'decode';
-use IPC::Run qw( run timeout );
+use Log::Log4perl qw(:easy);
 use Mojo::ByteStream;
 use Mojo::DOM;
 use Mojo::File 'path';
 use Text::MultiMarkdown 'markdown';
+use WWW::Mechanize::Chrome;
 use YAML::XS;
 
 podhelp;
@@ -431,32 +441,16 @@ for my $opt (@$builds) {
     if ( grep { /^pdf$/i } @{ $opt->{types} } ) {
         say 'Generate PDF output' unless ( $opt->{quiet} );
 
-        my $pdf      = $opt->{directory}->child( $opt->{basename} . '.pdf'        )->remove;
+        my $pdf      = $opt->{directory}->child( $opt->{basename} . '.pdf'        );
         my $html2pdf = $opt->{directory}->child( $opt->{basename} . '.paged.html' );
 
-        try {
-            run(
-                [
-                    'chrome-headless-render-pdf',
-                    '--chrome-option=--no-sandbox',
-                    '--no-margins',
-                    '--url',
-                    'file://' . $html2pdf->to_abs->to_string,
-                    '--pdf',
-                    $pdf->to_string,
-                ],
-                my \$in,
-                my \$out,
-                my \$err,
-                timeout(60),
-            );
-            die $err if ( $err and index( $err, 'Saved to' ) == -1 );
-            say join( "\n", map { '  ' . $_ } split( /\r?\n/, $out . $err ) ) unless ( $opt->{quiet} );
-        }
-        catch ($e) {
-            die $e if ( index( $e, 'IPC::Run: timeout on timer' ) == -1 );
-        }
+        Log::Log4perl->easy_init($ERROR);
+        my $mech = WWW::Mechanize::Chrome->new( headless => 1 );
+        $mech->get( 'file://' . $html2pdf->to_abs->to_string );
+        die "Failed to load HTML to convert to PDF\n" unless ( $mech->status == 200 );
 
+        $mech->sleep( $opt->{pdf_wait} ) if ( $opt->{pdf_wait} );
+        $pdf->spurt( $mech->content_as_pdf );
         die "Failed to generate PDF output\n" if ( not -f $pdf );
     }
 
