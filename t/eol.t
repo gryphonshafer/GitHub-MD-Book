@@ -12,6 +12,7 @@ my $matcher = build_gitignore_matcher( [
 
 path('.')
     ->list_tree({ hidden => 1 })
+    ->grep( sub { not /\.pdf$/ } )
     ->map( sub { './' . $_->to_rel } )
     ->grep( sub { -f $_ and -T $_ and not $matcher->($_) } )
     ->each( sub {

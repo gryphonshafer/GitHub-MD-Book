@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-build.pl - Build Markdown and HTML book files from Markdown source files
+build.pl - Build Markdown, HTML, and PDF book files from Markdown source files
 
 =head1 SYNOPSIS
 
@@ -12,7 +12,7 @@ build.pl - Build Markdown and HTML book files from Markdown source files
 
 =head1 DESCRIPTION
 
-This program will build Markdown and HTML book files from Markdown source
+This program will build Markdown, HTML, and PDF book files from Markdown source
 files. Given a C<WORKSPACE_ROOT> directory (which will default to the current
 working directory if not specified), this program will search for Markdown
 source files and build output files based on C<CONFIGURATION_SETTINGS_YAML_FILE>
@@ -45,6 +45,7 @@ For example:
         encoding: utf-8
         directory: output
         basename: build
+        pdf_wait: 5
     builds:
       - workspace: book
         basename: book
@@ -143,7 +144,7 @@ HTML output will be saved to "output.html" by default.
 
 One or more output types can be set using this option. If this option is not
 specified, all outputs are set for types. The type options available are:
-MD and HTML.
+MD, HTML, and PDF.
 
 =head3 insert
 
@@ -159,7 +160,15 @@ header section of the HTML generated output. The default is: "style.css".
 
 This option if set will result in an output file with name suffix ".paged.html"
 to be generated. This file is intended to be viewed in a browser to preview
-what a printed paged document should look like.
+what a PDF should look like.
+
+=head2 pdf_wait
+
+This option if set will cause a wait/sleep period to happen of a given number
+of seconds during the PDF generation phase (if that phase happens). For books
+with a certain level of high complexity or length, setting this wait/sleep time
+gives the underlying rendering process time to perform all necessary work prior
+to rendering the PDF output.
 
 =head3 quiet
 
@@ -181,11 +190,12 @@ use exact -cli, -me;
 use Cwd 'cwd';
 use Date::Format 'time2str';
 use Encode 'decode';
-use IPC::Run qw( run timeout );
+use Log::Log4perl qw(:easy);
 use Mojo::ByteStream;
 use Mojo::DOM;
 use Mojo::File 'path';
 use Text::MultiMarkdown 'markdown';
+use WWW::Mechanize::Chrome;
 use YAML::XS;
 
 podhelp;
@@ -228,7 +238,7 @@ my $builds = [
         $build->{basename}   ||= 'output';
         $build->{build_date} ||= '%Y-%m-%d %H:%M:%S %Z';
 
-        $build->{types} = [ qw( md html ) ] unless ( $build->{types} and @{ $build->{types} } );
+        $build->{types} = [ qw( md html pdf ) ] unless ( $build->{types} and @{ $build->{types} } );
 
         my $vars = {
             %ENV,
@@ -413,13 +423,13 @@ for my $opt (@$builds) {
         $spurt->( $html, '.html' );
     }
 
-    if ( $opt->{paged} ) {
+    if ( $opt->{paged} or grep { /^pdf$/i } @{ $opt->{types} } ) {
         $dom = Mojo::DOM->new($html);
         $dom->at('body')->append_content(
             '<script>document.getElementsByTagName("body")[0].style.margin = "0px"</script>'
         );
 
-        say 'Write paged preview HTML output' unless ( $opt->{quiet} );
+        say 'Write PDF preview HTML output' unless ( $opt->{quiet} );
         $dom->at('body')
             ->append_content(q{
                 <script src="https://unpkg.com/pagedjs/dist/paged.polyfill.js"></script>
@@ -427,4 +437,22 @@ for my $opt (@$builds) {
 
         $spurt->( $dom->to_string, '.paged.html' );
     }
+
+    if ( grep { /^pdf$/i } @{ $opt->{types} } ) {
+        say 'Generate PDF output' unless ( $opt->{quiet} );
+
+        my $pdf      = $opt->{directory}->child( $opt->{basename} . '.pdf'        );
+        my $html2pdf = $opt->{directory}->child( $opt->{basename} . '.paged.html' );
+
+        Log::Log4perl->easy_init($ERROR);
+        my $mech = WWW::Mechanize::Chrome->new( headless => 1 );
+        $mech->get( 'file://' . $html2pdf->to_abs->to_string );
+        die "Failed to load HTML to convert to PDF\n" unless ( $mech->status == 200 );
+
+        $mech->sleep( $opt->{pdf_wait} ) if ( $opt->{pdf_wait} );
+        $pdf->spurt( $mech->content_as_pdf );
+        die "Failed to generate PDF output\n" if ( not -f $pdf );
+    }
+
+    $opt->{directory}->child( $opt->{basename} . '.paged.html' )->remove unless ( $opt->{paged} );
 }

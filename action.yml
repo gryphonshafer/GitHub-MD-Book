@@ -1,5 +1,5 @@
 name: GitHub MD Book
-description: Build Markdown and HTML book files from Markdown source files
+description: Build Markdown, HTML, and PDF book files from Markdown source files
 branding:
     icon: book
     color: blue

@@ -1,9 +1,10 @@
 requires 'Cwd', '3.75';
 requires 'Date::Format', '2.24';
 requires 'Encode', '3.17';
-requires 'IPC::Run', '20200505.0';
+requires 'Log::Log4perl', '1.55';
 requires 'Mojolicious', '9.25';
 requires 'Text::MultiMarkdown', '1.000035';
+requires 'WWW::Mechanize::Chrome', '0.68';
 requires 'YAML::XS', '0.83';
 requires 'exact', '1.19';
 requires 'exact::cli', '1.06';
