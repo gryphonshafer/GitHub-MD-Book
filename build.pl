@@ -418,50 +418,7 @@ for my $opt (@$builds) {
         $dom->at('body')->append_content(
             '<script>document.getElementsByTagName("body")[0].style.margin = "0px"</script>'
         );
-    }
 
-    if ( grep { /^pdf$/i } @{ $opt->{types} } ) {
-        say 'Generate PDF output' unless ( $opt->{quiet} );
-        my $iterations;
-
-        my $pdf      = $opt->{directory}->child( $opt->{basename} . '.pdf'            )->remove;
-        my $html2pdf = $opt->{directory}->child( $opt->{basename} . '._html2pdf.html' );
-
-        $spurt->( $dom->to_string, '._html2pdf.html', '.pdf' );
-
-        while ( ++$iterations <= 3 and not -f $pdf ) {
-            say '  Iteration: ' . $iterations unless ( $opt->{quiet} );
-            try {
-                run(
-                    [
-                        'pagedjs-cli',
-                        $html2pdf->to_string,
-                        '-o',
-                        $pdf->to_string,
-                        '--browserArgs',
-                        '--no-sandbox,--disable-setuid-sandbox',
-                    ],
-                    my \$in,
-                    my \$out,
-                    my \$err,
-                    timeout( $iterations * 30 ),
-                );
-
-                die $err if ( $err and index( $err, 'Saved to' ) == -1 );
-
-                say join( "\n", map { '  ' . substr( $_, 2 ) } split( /\r?\n/, $out . $err ) )
-                    unless ( $opt->{quiet} );
-            }
-            catch ($e) {
-                die $e if ( index( $e, 'IPC::Run: timeout on timer' ) == -1 );
-            }
-        }
-
-        $html2pdf->remove;
-        die "Failed to generate PDF output\n" if ( not -f $pdf );
-    }
-
-    if ( $opt->{paged} ) {
         say 'Write PDF preview HTML output' unless ( $opt->{quiet} );
         $dom->at('body')
             ->append_content(q{
@@ -470,4 +427,38 @@ for my $opt (@$builds) {
 
         $spurt->( $dom->to_string, '.paged.html' );
     }
+
+    if ( grep { /^pdf$/i } @{ $opt->{types} } ) {
+        say 'Generate PDF output' unless ( $opt->{quiet} );
+
+        my $pdf      = $opt->{directory}->child( $opt->{basename} . '.pdf'        )->remove;
+        my $html2pdf = $opt->{directory}->child( $opt->{basename} . '.paged.html' );
+
+        try {
+            run(
+                [
+                    'chrome-headless-render-pdf',
+                    '--chrome-option=--no-sandbox',
+                    '--no-margins',
+                    '--url',
+                    'file://' . $html2pdf->to_abs->to_string,
+                    '--pdf',
+                    $pdf->to_string,
+                ],
+                my \$in,
+                my \$out,
+                my \$err,
+                timeout(60),
+            );
+            die $err if ( $err and index( $err, 'Saved to' ) == -1 );
+            say join( "\n", map { '  ' . $_ } split( /\r?\n/, $out . $err ) ) unless ( $opt->{quiet} );
+        }
+        catch ($e) {
+            die $e if ( index( $e, 'IPC::Run: timeout on timer' ) == -1 );
+        }
+
+        die "Failed to generate PDF output\n" if ( not -f $pdf );
+    }
+
+    $opt->{directory}->child( $opt->{basename} . '.paged.html' )->remove unless ( $opt->{paged} );
 }
