@@ -1,20 +1,21 @@
 requires 'Cwd', '3.75';
 requires 'Date::Format', '2.24';
-requires 'Encode', '3.17';
-requires 'Log::Log4perl', '1.55';
-requires 'Mojolicious', '9.25';
-requires 'Text::MultiMarkdown', '1.000035';
-requires 'WWW::Mechanize::Chrome', '0.68';
-requires 'YAML::XS', '0.83';
-requires 'exact', '1.19';
-requires 'exact::cli', '1.06';
-requires 'exact::me', '1.04';
+requires 'Encode', '3.21';
+requires 'Log::Log4perl', '1.57';
+requires 'Mojolicious', '9.37';
+requires 'Text::MultiMarkdown', '1.002';
+requires 'WWW::Mechanize::Chrome', '0.73';
+requires 'YAML::XS', '0.89';
+requires 'exact', '1.25';
+requires 'exact::cli', '1.07';
+requires 'exact::me', '1.05';
 
 on test => sub {
-    requires 'Test2::V0';
-    requires 'Test::EOL';
-    requires 'Test::Mojibake';
-    requires 'Test::NoTabs';
-    requires 'Test::Portability::Files';
-    requires 'Text::Gitignore';
+    requires 'IPC::Run', '20231003.0';
+    requires 'Test2::V0', '0.000163';
+    requires 'Test::EOL', '2.02';
+    requires 'Test::Mojibake', '1.3';
+    requires 'Test::NoTabs', '2.02';
+    requires 'Test::Portability::Files', '0.10';
+    requires 'Text::Gitignore', '0.04';
 };
