@@ -11,7 +11,7 @@ requires 'exact::cli', '1.07';
 requires 'exact::me', '1.05';
 
 on test => sub {
-    requires 'IPC::Run', '20231003.0';
+    requires 'IPC::Run3', '0.049';
     requires 'Test2::V0', '0.000163';
     requires 'Test::EOL', '2.02';
     requires 'Test::Mojibake', '1.3';

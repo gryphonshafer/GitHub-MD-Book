@@ -208,7 +208,7 @@ my $settings;
 try {
     $settings = YAML::XS::Load( decode( 'UTF-8', $workspace_root->child($settings_yaml)->slurp ) );
 }
-catch {}
+catch ($e) {}
 
 my $time   = time;
 my $builds = [
