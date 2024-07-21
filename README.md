@@ -14,8 +14,8 @@ Markdown source files. To use, setup a workflow under the project's
       build:
         runs-on: ubuntu-latest
         steps:
-          - uses: actions/checkout@v2
-          - uses: gryphonshafer/GitHub-MD-Book@v1
+          - uses: actions/checkout@v4
+          - uses: gryphonshafer/GitHub-MD-Book@v4
             with:
               settings: .github/github-md-book.yml
 
