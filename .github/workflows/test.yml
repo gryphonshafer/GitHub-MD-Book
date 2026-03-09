@@ -6,11 +6,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        perl-version: [ 38, 36, 34, 32, 30, 28, 26 ]
+        perl-version: [ 42, 40, 38, 36, 34, 32, 30, 28, 26 ]
     container:
       image: perldocker/perl-tester:5.${{ matrix.perl-version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: cpanm --with-develop --with-all-features --installdeps .
         env:
           PERL_CPANM_OPT: --from https://cpan.metacpan.org/ --notest --force --skip-satisfied
