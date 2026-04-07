@@ -26,6 +26,7 @@ jobs:
             HARNESS_PERL_SWITCHES: -MDevel::Cover
             CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         steps:
+            - run: apt-get update && apt-get install -y libgd3 libgd-dev
             - uses: actions/checkout@v6
             - uses: perl-actions/install-with-cpanm@v1
               with: { sudo: false, args: . }
